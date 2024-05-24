@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2048</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4f4f4;
+      color: #333;
+      overflow: hidden;
+    }
+
+    header {
+      background: #333;
+      color: #fff;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2em;
+    }
+
+    nav {
+      background: #666;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    nav ul {
+      list-style: none;
+    }
+
+    nav ul li {
+      display: inline;
+      margin-right: 20px;
+    }
+
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.2em;
+    }
+
+    .container {
+      width: 80%;
+      margin: auto;
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+
+    @media (max-width:768px) {
+      .container {
+        width: 90%;
+      }
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .navbar ul {
+      list-style-type: none;
+      background-color: rgb(73, 73, 73);
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      padding: 15px;
+      display: block;
+      text-align: center;
+    }
+
+    .navbar a:hover {
+      background-color: rgb(87, 87, 87);
+    }
+
+    .navbar li {
+      float: left;
+    }
+
+    .game {
+      box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5);
+      margin: 20px auto;
+      width: 550px;
+    }
+
+    .head {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .a {
+      font-family: Arial, sans-serif;
+      font-size: 100px;
+      font-weight: 200;
+      margin-right: 15px;
+    }
+
+    .info {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-weight: 100;
+      cursor: pointer;
+      border: 0;
+      background-color: #88b1ef;
+      color: #fff;
+      font-size: 20px;
+      margin-left: 25px;
+      transition: 0.1s background-color;
+    }
+
+    .info:hover {
+      background-color: #6593d8;
+    }
+
+    .score {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      top: 10px;
+      font-family: Arial, sans-serif;
+      font-weight: 400;
+      font-size: 30px;
+      color: grey;
+      text-align: center;
+    }
+
+    .field,
+    .grid {
+      width: 510px;
+      height: 510px;
+      background-color: #888;
+      margin: 20px auto;
+      border-radius: 10px;
+      border: 5px solid #888;
+      display: table;
+    }
+
+    .field {
+      z-index: 50;
+    }
+
+    .grid {
+      z-index: 100;
+    }
+
+    .row,
+    .grid_row {
+      width: 510px;
+      height: 135px;
+      display: table-row;
+    }
+
+    .cell,
+    .grid_cell {
+      background-color: white;
+      width: 125px;
+      height: 125px;
+      display: table-cell;
+      border-radius: 10px;
+      border: 5px solid #888;
+      text-align: center;
+      vertical-align: middle;
+      font-family: Arial, sans-serif;
+      font-size: 50px;
+    }
+
+    .grid_cell {
+      background-color: #aaa;
+      color: white;
+    }
+
+    .tile {
+      opacity: 1;
+      width: 118px;
+      height: 126px;
+      background-color: white;
+      z-index: 150;
+      border-radius: 10px;
+      font-weight: 200;
+      top: 0;
+      left: -1px;
+      color: black;
+      transition: 0.3s all;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-size: cover;
+    }
+
+    .description {
+      height: 250px;
+      width: 300px;
+      top: 1000px;
+      color: #333;
+      font-family: Arial, sans-serif;
+      transform: translate(-50%, -50%) scale(0);
+      position: absolute;
+      left: 50%;
+      top: 425px;
+      background: #fff;
+      padding: 50px;
+      border-radius: 10px;
+      z-index: 1000;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      visibility: hidden;
+      opacity: 0;
+      font-size: 15px;
+      transition: 0.3s all;
+    }
+
+    .description.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #status {
+      width: 100%;
+      height: 100vh;
+    }
+
+    .won {
+      background-color: #337538;
+      transition: 0.3s all;
+    }
+
+    .lose {
+      background-color: #7D3C34;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <ul>
+      <li><a href="index.html">sweet</a></li>
+      <li><a href="page2index.html">savory</a></li>
+      <li><a href="homepageindex.html">contact us</a></li> 
+      <li><a href="page3index.html">game</a></li>
+    </ul>
+  </nav>
+  <div class="game">
+    <div class="head">
+      <div class="a">2048 <button class="info" onClick="info()">i</button> <button id="repeat" class="info repeat" onClick="reset()">↻</button></div>
+      <div class="score">Score<br/><span id="value">0</span></div>
+    </div>
+    <div class="description" id="description">
+      How to play:<br/><br/>
+      Use your arrow keys to slide the tiles to add numbers together.
+    </div>
+    <div class="field" id="field">
+      <div class="row">
+        <div class="cell" id="11"></div>
+        <div class="cell" id="12"></div>
+        <div class="cell" id="13"></div>
+        <div class="cell" id="14"></div>
+      </div>
+      <div class="row">
+        <div class="cell" id="21"></div>
+        <div class="cell" id="22"></div>
+        <div class="cell" id="23"></div>
+        <div class="cell" id="24"></div>
+      </div>
+      <div class="row">
+        <div class="cell" id="31"></div>
+        <div class="cell" id="32"></div>
+        <div class="cell" id="33"></div>
+        <div class="cell" id="34"></div>
+      </div>
+      <div class="row">
+        <div class="cell" id="41"></div>
+        <div class="cell" id="42"></div>
+        <div class="cell" id="43"></div>
+        <div class="cell" id="44"></div>
+      </div>
+    </div>
+  </div>
+  <div id="status"></div>
+  <script>
+    const images = {
+      2: 'choc cupcake.jpeg',
+      4: 'fruit cupcake.jpeg',
+      8: 'yellow cupcake.jpeg',
+      16: 'oreo cupcake.jpeg',
+      32: 'vinalia .jpeg',
+      64: 'not pink cupcake.jpeg',
+      128: 'cupcake.jpeg',
+      256: 'unicorn cupcake.jpeg',
+      512: 'banana cupcake.jpeg',
+      1024: 'cherry cupcake.jpeg',
+      2048: 'bear cupcake.jpeg'
+    };
+
+    window.onload = function() {
+      buildGridOverlay();                   
+      cellCreator(2, 0);
+      document.onkeydown = directions;
+      score(0);
+    };
+
+    function buildGridOverlay() {
+      var game = document.getElementsByClassName('game'); 
+      var size = 4;
+      var table = document.createElement('div');
+      table.className = 'grid';
+      for (var i = 0; i < size; i++) {
+        var tr = document.createElement('div');
+        tr.className = 'grid_row';
+        for (var j = 0; j < size; j++) {
+          var td = document.createElement('div');
+          td.className = 'grid_cell';
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+      game[0].appendChild(table);
+    }
+
+    function info() {
+      var x = document.getElementById('description');
+      x.classList.toggle('show');
+    }
+
+    function reset() {
+      location.reload();
+    }
+
+    function score(value) {
+      var x = document.getElementById('value');
+      x.innerHTML = value;
+    }
+
+    function directions(e) {
+      if (document.getElementById('status').className === 'won' || document.getElementById('status').className === 'lose') return;
+
+      if ([37, 38, 39, 40].includes(e.keyCode)) e.preventDefault();
+
+      switch (e.keyCode) {
+        case 37:
+          cellShift(0);
+          break;
+        case 38:
+          cellShift(1);
+          break;
+        case 39:
+          cellShift(2);
+          break;
+        case 40:
+          cellShift(3);
+          break;
+      }
+    }
+
+    function cellShift(direction) {
+      var cellId;
+      var cells = [];
+      for (var i = 0; i < 4; i++) {
+        for (var j = 0; j < 4; j++) {
+          cellId = (i + 1).toString() + (j + 1).toString();
+          var cellElement = document.getElementById(cellId).firstChild;
+          var cellValue = cellElement ? parseInt(cellElement.getAttribute('data-value')) : 0;
+          cells.push(cellValue);
+        }
+      }
+
+      var tempGrid = [];
+      while (cells.length) tempGrid.push(cells.splice(0, 4));
+
+      var newGrid = JSON.parse(JSON.stringify(tempGrid));
+
+      switch (direction) {
+        case 0:
+          for (var i = 0; i < 4; i++) {
+            var row = tempGrid[i];
+            var newRow = shiftRowLeft(row);
+            newGrid[i] = newRow;
+          }
+          break;
+        case 1:
+          for (var j = 0; j < 4; j++) {
+            var col = tempGrid.map(row => row[j]);
+            var newCol = shiftRowLeft(col);
+            for (var i = 0; i < 4; i++) newGrid[i][j] = newCol[i];
+          }
+          break;
+        case 2:
+          for (var i = 0; i < 4; i++) {
+            var row = tempGrid[i].slice().reverse();
+            var newRow = shiftRowLeft(row).reverse();
+            newGrid[i] = newRow;
+          }
+          break;
+        case 3:
+          for (var j = 0; j < 4; j++) {
+            var col = tempGrid.map(row => row[j]).reverse();
+            var newCol = shiftRowLeft(col).reverse();
+            for (var i = 0; i < 4; i++) newGrid[i][j] = newCol[i];
+          }
+          break;
+      }
+
+      var changed = JSON.stringify(newGrid) !== JSON.stringify(tempGrid);
+      if (changed) {
+        for (var i = 0; i < 4; i++) {
+          for (var j = 0; j < 4; j++) {
+            cellId = (i + 1).toString() + (j + 1).toString();
+            var cellValue = newGrid[i][j];
+            var cellElement = document.getElementById(cellId);
+            if (cellValue) {
+              cellElement.innerHTML = `<img src="${images[cellValue]}" alt="${cellValue}" data-value="${cellValue}" style="width:100%;height:100%;">`;
+            } else {
+              cellElement.innerHTML = '';
+            }
+          }
+        }
+        cellCreator(1, 1);
+        checkWinLose();
+      }
+    }
+
+    function shiftRowLeft(row) {
+      row = row.filter(val => val);
+      for (var i = 0; i < row.length - 1; i++) {
+        if (row[i] === row[i + 1]) {
+          row[i] *= 2;
+          row.splice(i + 1, 1);
+          score(parseInt(document.getElementById('value').innerHTML) + row[i]);
+        }
+      }
+      while (row.length < 4) row.push(0);
+      return row;
+    }
+
+    function cellCreator(number, clear) {
+      var cellId, cellValue;
+      for (var n = 0; n < number; n++) {
+        var emptyCells = [];
+        for (var i = 0; i < 4; i++) {
+          for (var j = 0; j < 4; j++) {
+            cellId = (i + 1).toString() + (j + 1).toString();
+            var cellElement = document.getElementById(cellId).firstChild;
+            if (!cellElement) emptyCells.push(cellId);
+          }
+        }
+        if (emptyCells.length === 0) break;
+        var randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        var newValue = clear ? 2 : [2, 4][Math.floor(Math.random() * 2)];
+        document.getElementById(randomCell).innerHTML = `<img src="${images[newValue]}" alt="${newValue}" data-value="${newValue}" style="width:100%;height:100%;">`;
+      }
+    }
+
+    function checkWinLose() {
+      var gridFull = true;
+      var canMove = false;
+      var cells = [];
+      for (var i = 0; i < 4; i++) {
+        for (var j = 0; j < 4; j++) {
+          var cellId = (i + 1).toString() + (j + 1).toString();
+          var cellElement = document.getElementById(cellId).firstChild;
+          var cellValue = cellElement ? parseInt(cellElement.getAttribute('data-value')) : 0;
+          if (cellValue === 2048) {
+            document.getElementById('status').className = 'won';
+            document.getElementById('status').innerHTML = 'You Won!';
+            return;
+          }
+          if (!cellValue) gridFull = false;
+          cells.push(cellValue);
+        }
+      }
+      if (!gridFull) return;
+
+      for (var i = 0; i < 4; i++) {
+        for (var j = 0; j < 4; j++) {
+          var cellId = (i + 1).toString() + (j + 1).toString();
+          var cellValue = parseInt(document.getElementById(cellId).firstChild.getAttribute('data-value'));
+          if (i > 0 && cellValue === parseInt(document.getElementById((i).toString() + (j + 1).toString()).firstChild.getAttribute('data-value'))) canMove = true;
+          if (i < 3 && cellValue === parseInt(document.getElementById((i + 2).toString() + (j + 1).toString()).firstChild.getAttribute('data-value'))) canMove = true;
+          if (j > 0 && cellValue === parseInt(document.getElementById((i + 1).toString() + j.toString()).firstChild.getAttribute('data-value'))) canMove = true;
+          if (j < 3 && cellValue === parseInt(document.getElementById((i + 1).toString() + (j + 2).toString()).firstChild.getAttribute('data-value'))) canMove = true;
+        }
+      }
+
+      if (!canMove) {
+        document.getElementById('status').className = 'lose';
+        document.getElementById('status').innerHTML = 'Game Over!';
+      }
+    }
+  </script>
+</body>
+</html>
